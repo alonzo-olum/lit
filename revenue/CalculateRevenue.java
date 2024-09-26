@@ -10,6 +10,18 @@ class CalculateRevenue {
     private static final String YEAR_MONTH = "2022-10";
     private static final int MONTHLY_CHARGE = 50;
 
+    public static Money calculateRevenue(Users users) {
+       TemporalValueObject yearAndMonth = getYearAndMonth(YEAR_MONTH);
+
+       int daysOfMonth = YearMonth.of(yearAndMonth.getYear(), yearAndMonth.getMonth()).lengthOfMonth();
+       int chargeRate = getDailyChargeRate(daysOfMonth, MONTHLY_CHARGE);
+
+       int total = getTotalForActiveUsers(users,
+		       yearAndMonth,
+		       chargeRate); 
+       return new Money(total);
+    }
+    
     private static TemporalValueObject getYearAndMonth(String yearMonth) { 
         String[] yearMonthArray = yearMonth.split("-");
 	int year = Integer.valueOf(yearMonthArray[0]);
@@ -35,40 +47,27 @@ class CalculateRevenue {
 		        .collect(Collectors.summingInt(user -> sumRevenuePerDayForUser(user, dailyCharge)));
     }
 
-    private static boolean isWithinPeriod(LocalDate startDay, LocalDate dayToday) {
-        return startDay.isBefore(dayToday) || startDay.isEqual(dayToday);
-    }
-
-    private static LocalDate nextDay(LocalDate day) { return day.plusDays(1); }
-    private static LocalDate firstDay(LocalDate day) { return day.withDayOfMonth(1); }
-    private static LocalDate lastDay(LocalDate day) { return day.withDayOfMonth(day.getMonth().maxLength()); }
-
     private static int sumRevenuePerDayForUser(Users.User user, int dailyCharge) {
 	int total = 0;
         LocalDate startDate = firstDay(user.getActivatedOn());
         LocalDate lastDate = lastDay(user.getActivatedOn());
 
-        for (LocalDate dayOne = startDate; isWithinPeriod(dayOne, lastDate); dayOne = nextDay(dayOne)) {
-	    if (isWithinPeriod(user.getActivatedOn(), dayOne) && !isWithinPeriod(user.getDeactivatedOn(), dayOne)) {
+        for (LocalDate dayToday = startDate; isWithinPeriod(dayToday, lastDate); dayToday = nextDay(dayToday)) {
+	    if (isWithinPeriod(user.getActivatedOn(), dayToday) && !isWithinPeriod(user.getDeactivatedOn(), dayToday)) {
 	         total+=dailyCharge; 
 	    }
 	}
 	return total;
     }
 
-    public static Money calculateRevenue(Users users) {
-       TemporalValueObject yearAndMonth = getYearAndMonth(YEAR_MONTH);
+    private static LocalDate firstDay(LocalDate day) { return day.withDayOfMonth(1); }
+    private static LocalDate nextDay(LocalDate day) { return day.plusDays(1); }
+    private static LocalDate lastDay(LocalDate day) { return day.withDayOfMonth(day.getMonth().maxLength()); }
 
-       int daysOfMonth = YearMonth.of(yearAndMonth.getYear(), yearAndMonth.getMonth()).lengthOfMonth();
-       int chargeRate = getDailyChargeRate(daysOfMonth, MONTHLY_CHARGE);
-
-       int total = getTotalForActiveUsers(users,
-		       yearAndMonth,
-		       chargeRate); 
-       return new Money(total);
+    private static boolean isWithinPeriod(LocalDate startDay, LocalDate dayToday) {
+        return startDay.isBefore(dayToday) || startDay.isEqual(dayToday);
     }
-
-
+    
     private static class TemporalValueObject {
         private int year;
         private int month;
