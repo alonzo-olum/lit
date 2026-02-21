@@ -1,78 +1,69 @@
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import java.time.LocalDate;
 import java.time.YearMonth;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.time.temporal.*;
 
 class CalculateRevenue {
 
     private static final String YEAR_MONTH = "2022-10";
-    private static final int MONTHLY_CHARGE = 50;
+    private static final BigDecimal MONTHLY_CHARGE = BigDecimal.valueOf(50);
 
     public static Money calculateRevenue(Users users) {
-       TemporalValueObject yearAndMonth = getYearAndMonth(YEAR_MONTH);
+       TempValObj yearAndMonth = getYearAndMonth(YEAR_MONTH);
 
        int daysOfMonth = YearMonth.of(yearAndMonth.getYear(), yearAndMonth.getMonth()).lengthOfMonth();
-       int chargeRate = getDailyChargeRate(daysOfMonth, MONTHLY_CHARGE);
+       BigDecimal chargeRate = getDailyChargeRate(daysOfMonth);
 
-       int total = getTotalForActiveUsers(users,
+       double total = getTotalForActiveUsers(users,
 		       yearAndMonth,
 		       chargeRate); 
        return new Money(total);
     }
     
-    private static TemporalValueObject getYearAndMonth(String yearMonth) { 
+    private static TempValObj getYearAndMonth(String yearMonth) { 
         String[] yearMonthArray = yearMonth.split("-");
 	int year = Integer.valueOf(yearMonthArray[0]);
        	int month = Integer.valueOf(yearMonthArray[1]);
-	return new TemporalValueObject(year, month);
+	return new TempValObj(year, month);
     }
 
-    private static int getDailyChargeRate(int daysInMonth, long monthCharge) {
-        return Math.round(monthCharge / daysInMonth);
+    private static BigDecimal getDailyChargeRate(int daysInMonth) {
+        return MONTHLY_CHARGE.divide(BigDecimal.valueOf(daysInMonth), 2, RoundingMode.HALF_UP);
     }
 
-    private static int getTotalForActiveUsers(Users users, TemporalValueObject yearAndMonth, int dailyCharge) {
+    private static double getTotalForActiveUsers(Users users, TempValObj yearAndMonth, BigDecimal dailyCharge) {
 	int yearValue = yearAndMonth.getYear();
 	int monthValue = yearAndMonth.getMonth();
+	LocalDate startDate = LocalDate.of(yearValue, monthValue, 1);
+	LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 	
         return users.getUsers().stream()
-		    .filter(user -> 
-			// activatedOn same month
-			user.getActivatedOn().getMonthValue() == monthValue
-		        // activatedOn same year
-			&& user.getActivatedOn().getYear() == yearValue
-		    )
-		        .collect(Collectors.summingInt(user -> sumRevenuePerDayForUser(user, dailyCharge)));
+		    .filter(user -> isEligible(user, startDate, endDate))
+		        .collect(Collectors.summingDouble(user -> sumRevenuePerMonth(user, dailyCharge, startDate, endDate)));
     }
 
-    private static int sumRevenuePerDayForUser(Users.User user, int dailyCharge) {
-	int total = 0;
-        LocalDate startDate = firstDay(user.getActivatedOn());
-        LocalDate lastDate = lastDay(user.getActivatedOn());
-
-        for (LocalDate dayToday = startDate; isWithinPeriod(dayToday, lastDate); dayToday = nextDay(dayToday)) {
-	    if (isWithinPeriod(user.getActivatedOn(), dayToday) && !isWithinPeriod(user.getDeactivatedOn(), dayToday)) {
-	         total+=dailyCharge; 
-	    }
-	}
-	return total;
+    private static double sumRevenuePerMonth(Users.User user, BigDecimal dailyCharge, LocalDate startDate, LocalDate endDate) {
+        LocalDate start = user.getActivatedOn().isBefore(startDate) ? startDate : user.getActivatedOn();
+        LocalDate end = user.getDeactivatedOn();
+        long activeDays = ChronoUnit.DAYS.between(start, end) + 1;
+	return dailyCharge.multiply(BigDecimal.valueOf(activeDays)).doubleValue();
     }
 
-    private static LocalDate firstDay(LocalDate day) { return day.withDayOfMonth(1); }
-    private static LocalDate nextDay(LocalDate day) { return day.plusDays(1); }
-    private static LocalDate lastDay(LocalDate day) { return day.withDayOfMonth(day.getMonth().maxLength()); }
-
-    private static boolean isWithinPeriod(LocalDate startDay, LocalDate dayToday) {
-        return startDay.isBefore(dayToday) || startDay.isEqual(dayToday);
+    private static boolean isEligible(Users.User user, LocalDate startDate, LocalDate endDate) {
+	return !(user.getActivatedOn().isAfter(endDate) || user.getDeactivatedOn().isBefore(startDate));
     }
     
-    private static class TemporalValueObject {
+    private static class TempValObj {
         private int year;
         private int month;
 
-	public TemporalValueObject(int year, int month) {
+	public TempValObj(int year, int month) {
             this.year = year; 
             this.month = month; 
 	}
@@ -89,7 +80,7 @@ class CalculateRevenue {
 				LocalDate.of(2022, 10, 31))
 			);
 	Users users = new Users(usersArray);
-        long revenue = CalculateRevenue
+        BigDecimal revenue = CalculateRevenue
 		.calculateRevenue(users)
 		.amount();
         System.out.println(revenue);

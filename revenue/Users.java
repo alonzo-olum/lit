@@ -19,6 +19,8 @@ class Users {
 		    }
 	    LocalDate getActivatedOn() { return activatedOn; }
 	    LocalDate getDeactivatedOn() { return deactivatedOn; }
+	    boolean isActiveOn(LocalDate date) { return (this.activatedOn.isEqual(date) || this.activatedOn.isBefore(date)) &&
+		    (this.deactivatedOn.isEqual(date) || this.deactivatedOn.isAfter(date)); }
 	}
 
 	public Users(ArrayList<User> users) { this.users = users; }

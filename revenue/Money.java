@@ -1,9 +1,11 @@
- class Money {
-     private long amount;
+import java.math.BigDecimal;
 
-     public Money(int amount) {
-         this.amount = Math.round(amount);
+ class Money {
+     private BigDecimal amount;
+
+     public Money(double amount) {
+         this.amount = BigDecimal.valueOf(amount);
      }
 
-     public long amount() { return amount; }
+     public BigDecimal amount() { return amount; }
  }

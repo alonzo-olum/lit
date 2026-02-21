@@ -9,6 +9,8 @@ class Permutation {
 	    System.out.println("final: " + prefix);
 	} else {
 	    for (int i = 0; i < str.length(); i++) {
+		System.out.println("what is string now?" + str);
+		System.out.println("what will rem be ?" + str.substring(0,i));
 	        String rem = str.substring(0, i) + str.substring(i+1);
 		System.out.println("str.substring(0, " 
 				+ i 
