@@ -10,7 +10,7 @@ class CalculateRevenueV2 {
 
     private static final double MONTHLY_CHARGE = 50;
 
-    public static Double calculateRevenue(Users users, String month) {
+    public static double calculateRevenue(Users users, String month) {
         String[] yearAndMonth = month.split("-");
 	int yearValue = Integer.valueOf(yearAndMonth[0]);
 	int monthValue = Integer.valueOf(yearAndMonth[1]);
