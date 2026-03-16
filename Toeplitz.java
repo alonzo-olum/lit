@@ -1,9 +1,3 @@
-import static java.util.AbstractMap.SimpleEntry;
-
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Map;
-import java.util.HashMap;
 
 public class Toeplitz {
 	public static void main(String[] args) {
