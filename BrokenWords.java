@@ -1,4 +1,8 @@
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -21,7 +25,7 @@ public class BrokenWords {
 		String[] cases = {s1, s2, s3, s4,
 					s5, s6, s7, s8,
 						s9, s10};
-		Arrays.stream(cases).forEach(s -> System.out.println(solution(s)));
+		Arrays.stream(cases).forEach(s -> System.out.println(optimizedSoln(s)));
 	}
 	public static Map.Entry<Character, Integer> solution(String s) {
 		// delimit s by '\s'(space)
@@ -42,9 +46,31 @@ public class BrokenWords {
 		}
 		// get the char most occurring,
 		// this is the char with the most broken words
-		return charAppear.entrySet()
-			.stream()
+		return charAppear.entrySet().stream()
 			.max(Map.Entry.comparingByValue())
 			.get();
+	}
+
+	public static Map.Entry<Character, Integer> optimizedSoln(String s) {
+		// delimit
+		String[] words = s.split("\\s");
+		// dedup
+		Set<String> wordSet = Stream.of(words)
+			.collect(Collectors.toCollection(LinkedHashSet::new));
+		Map<Character, Set<String>> charSet = new LinkedHashMap<>();
+		// add each word to charSet
+		for (String word : wordSet) {
+			Set<Character> cSet = word.chars()
+				.mapToObj(obj -> (char) obj)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+			for (Character c : cSet) {
+				charSet.computeIfAbsent(c, k -> new HashSet<>()).add(word);
+			}
+		}
+		// return the Map.Entry w/ most words
+		return charSet.entrySet().stream()
+			.max(Comparator.comparingInt(e -> e.getValue().size()))
+			.map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().size()))
+			.orElse(new AbstractMap.SimpleEntry<>('\0', 0));
 	}
 }
