@@ -5,7 +5,6 @@ public class CompressedGene {
 
 		final String GENE = "ATCATACCGATGAGTG";
 		CompressedGene cGene = new CompressedGene(GENE);
-		cGene.compress(GENE);
 		System.out.println(cGene.decompress());
 	}
 
