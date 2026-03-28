@@ -1,0 +1,96 @@
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import java.util.Stack;
+
+public class GenericSearch {
+	public static void main(String[] args) {
+		System.out.println(linearContains(List.of(12, 3, 5, 1, 6, 78, 45, 13), 12));
+	}
+
+	public static <T extends Comparable<T>> boolean linearContains(List<T> list, T key) {
+		return list.stream().anyMatch(l -> l.compareTo(key) == 0);
+
+	}
+
+	public static <T extends Comparable<T>> boolean binaryContains(List<T> list, T key) {
+		int low = 0, high = list.size() - 1;
+		while (low <= high) {
+			int middle = low + (high - low) / 2;
+			int comparison = list.get(middle).compareTo(key);
+			if (comparison == 0) {
+				return true;
+			} else if (comparison < 0) {
+				low = middle + 1;
+			} else {
+				high = middle - 1;
+			}
+		}
+		return false;
+	}
+
+	public static class Node<T> implements Comparable<Node<T>> {
+		final T state;
+		Node<T> parent;
+		double cost, heuristic;
+
+		Node(T state, Node<T> parent) {
+			this.state = state;
+			this.parent = parent;
+		}
+
+		Node(T state, Node<T> parent, double cost, double heuristic) {
+			this.state = state;
+			this.parent = parent;
+			this.cost = cost;
+			this.heuristic = heuristic;
+		}
+
+		public int compareTo(Node<T> other) {
+			Double mine = cost + heuristic;
+			Double theirs = other.cost = other.heuristic;
+			return mine.compareTo(theirs);
+		}
+	}
+
+	public static <T> Node<T> dfs(T initial, Predicate<T> goalTest, Function<T, List<T>> successors) {
+		// frontier is where we want to go
+		Stack<Node<T>> frontier = new Stack<>();
+		frontier.push(new Node<>(initial, null));
+
+		// explored is where we have been
+		Set<T> explored = new HashSet<>();
+		explored.add(initial);
+
+		while (!frontier.isEmpty()) {
+			Node<T> current = frontier.pop();
+			T currState = current.state;
+			if (goalTest.test(currState))
+				return current;
+
+			for (T child : successors.apply(currState)) {
+				if (explored.contains(child))
+					continue;
+
+				explored.add(child);
+				frontier.push(new Node<>(child, current));
+			}
+		}
+		return null;
+	}
+
+	public static <T> List<T> nodeToPath(Node<T> node) {
+		List<T> path = new ArrayList<>();
+		path.add(node.state);
+		// working backwards from end to front
+		while (node.parent != null) {
+			node = node.parent;
+			path.add(0, node.state);
+		}
+		return path;
+	}
+}
