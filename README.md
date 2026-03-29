@@ -1,3 +1,10 @@
-Sequel to litchallenge random sources in java language. 
-Mostly java8 concepts such as; streams in terse and concise code.
-Get a good feel of code sense.
+
+Problems and covering the following algorithms:
+    - Two Pointers
+    - Map Optimization
+    - Searches and sorting
+    - Sliding Window
+    - Problem Solving: Calculate Daily Revenue from user subscription
+`misc/` directory harbors everything else that do not belong to a particular category but very relevant to algorithms and problem-solving.
+
+All solutions are in Java.
