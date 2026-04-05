@@ -38,11 +38,13 @@ public class GenericSearch {
 		Node<T> parent;
 		double cost, heuristic;
 
+		// for dfs and bfs we omit heuristic and cost
 		Node(T state, Node<T> parent) {
 			this.state = state;
 			this.parent = parent;
 		}
 
+		// a* will use heuristic and cost
 		Node(T state, Node<T> parent, double cost, double heuristic) {
 			this.state = state;
 			this.parent = parent;

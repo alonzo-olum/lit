@@ -1,12 +1,20 @@
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 public class Maze {
 
 	public static void main(String[] args) {
 		Maze maze = new Maze();
-		System.out.println(maze);
+		GenericSearch.Node<MazeLocation> nodeS = GenericSearch.dfs(maze.start, maze::goalTest, maze::successors);
+		if (nodeS == null) {
+			System.out.println("No solution for dfs!");
+		} else {
+			List<MazeLocation> path = GenericSearch.nodeToPath(nodeS);
+			maze.mark(path);
+			System.out.println(maze);
+			maze.clear(path);
+		}
 	}
 
 	public enum Cell {
@@ -45,9 +53,9 @@ public class Maze {
 		}
 
 		public boolean equals(Object obj) {
-			if (this != obj)
-				return false;
-			if (getClass() != obj.getClass())
+			if (this == obj)
+				return true;
+			if (!(obj instanceof MazeLocation))
 				return false;
 
 			MazeLocation other = (MazeLocation) obj;
@@ -111,10 +119,19 @@ public class Maze {
 
 	public List<MazeLocation> successors(MazeLocation ml) {
 		List<MazeLocation> locations = new ArrayList<>();
+		// check downwards and horizontally
 		if (ml.row + 1 < rows && grid[ml.row + 1][ml.column] != Cell.BLOCKED) {
 			locations.add(new MazeLocation(ml.row + 1, ml.column));
 		}
-		// check downwards and horizontally
+		if (ml.row - 1 >= 0 && grid[ml.row - 1][ml.column] != Cell.BLOCKED) {
+			locations.add(new MazeLocation(ml.row - 1, ml.column));
+		}
+		if (ml.column + 1 < columns && grid[ml.row][ml.column + 1] != Cell.BLOCKED) {
+			locations.add(new MazeLocation(ml.row, ml.column + 1));
+		}
+		if (ml.column - 1 >= 0 && grid[ml.row][ml.column - 1] != Cell.BLOCKED) {
+			locations.add(new MazeLocation(ml.row, ml.column - 1));
+		}
 		return locations;
 	}
 
@@ -123,6 +140,14 @@ public class Maze {
 			grid[ml.row][ml.column] = Cell.PATH;
 		}
 		grid[start.row][start.column] = Cell.START;
-		grid[end.row][end.column] = Cell.START;
+		grid[end.row][end.column] = Cell.END;
+	}
+
+	public void clear(List<MazeLocation> path) {
+		for (MazeLocation ml : path) {
+			grid[ml.row][ml.column] = Cell.EMPTY;
+		}
+		grid[start.row][start.column] = Cell.START;
+		grid[end.row][end.column] = Cell.END;
 	}
 }
