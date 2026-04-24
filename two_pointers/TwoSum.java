@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.AbstractMap.SimpleEntry;
 
 public class TwoSum {
+	public static void main(String[] args) {
+		int[] numbers = {3, 5, 2, 7, 9, 4};
+		List<Map.Entry<Integer, Integer>> pairs = findPairsOptimized(numbers, 11);
+		System.out.println(pairs);
+	}
+
 	public static ArrayList<Map.Entry<Integer, Integer>> findPairs(int[] numbers, int target) {
 		Map<Integer, Integer> pairer = new HashMap<>();
 		Map<Integer, Integer> result = new HashMap<>();
