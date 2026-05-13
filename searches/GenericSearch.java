@@ -85,6 +85,32 @@ public class GenericSearch {
 		return null;
 	}
 
+	public static <T> Node<T> bfs(T initial, Predicate<T> goalTest, Function<T, List<T>> successors) {
+		// frontier is where we want to go
+		Queue<Node<T>> frontier = new LinkedList<>();
+		frontier.offer(new Node<>(initial, null));
+
+		// explored is where we have been
+		Set<T> explored = new HashSet<>();
+		explored.add(initial);
+
+		while (!frontier.isEmpty()) {
+			Node<T> current = frontier.poll();
+			T currState = current.state;
+			if (goalTest.test(currState))
+				return current;
+
+			for (T child : successors.apply(currState)) {
+				if (explored.contains(child))
+					continue;
+
+				explored.add(child);
+				frontier.offer(new Node<>(child, current));
+			}
+		}
+		return null;
+	}
+
 	public static <T> List<T> nodeToPath(Node<T> node) {
 		List<T> path = new ArrayList<>();
 		path.add(node.state);

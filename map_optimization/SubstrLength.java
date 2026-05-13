@@ -6,7 +6,7 @@ import java.util.Map;
 public class SubstrLength {
 
 	public static void main(String[] args) {
-		String s1 = "abacdc";
+		String s1 = "abacdcd";
 		String s2 = "abacbc";
 		String s3 = "ghdcac";
 		String s4 = "bbcarc";
