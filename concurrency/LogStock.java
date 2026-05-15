@@ -1,9 +1,12 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 public class LogStock {
@@ -38,6 +41,32 @@ public class LogStock {
 			    count++;
 			}
 		}
+		return logs;
+	}
+
+	static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+	static final AtomicInteger counter = new AtomicInteger(0);
+
+	public static List<String> logStockUpdated(int instances, int numOfStock, List<Stock> stocks) throws InterruptedException {
+		List<String> logs = Collections.synchronizedList( new ArrayList<>());
+
+		scheduler.scheduleAtFixedRate(() -> {
+			int count = counter.incrementAndGet();
+			String header = String.format("Second: %d", count);
+			StringBuilder strBuilder = new StringBuilder();
+
+			stocks.forEach(stock -> {
+				stock.updatePrice();
+				strBuilder.append(stock.toString());
+				strBuilder.append("\n");
+			});
+			logs.add(String.format("%s\n%s", header, strBuilder.toString()));
+			//System.out.println(strBuilder.toString());
+
+			if (count >= instances)
+			    scheduler.shutdown();
+		}, 1, 1, TimeUnit.SECONDS);
+		scheduler.awaitTermination(7, TimeUnit.SECONDS);
 		return logs;
 	}
 
