@@ -25,13 +25,13 @@ public class LogStock {
 
 	public static List<String> logStock(int instances, int numOfStock, List<Stock> stocks) {
 		int count = 1;
-		List<String> logs = new ArrayList<>();
+		List<String> logs = Collections.synchronizedList(new ArrayList<>());
 
 		// acquire lock however not as fast as lock-free strategies
 		synchronized(LOCK) {
 			while (count <= instances) {
 			    String header = String.format("Second: %d", count);
-			    StringBuilder sb = new StringBuilder();
+			    StringBuffer sb = new StringBuffer();
 			    stocks.forEach(stock -> {
 			    	stock.updatePrice();
 			    	sb.append(String.format("%s", stock));
@@ -48,7 +48,7 @@ public class LogStock {
 	static final AtomicInteger counter = new AtomicInteger(0);
 
 	public static List<String> logStockUpdated(int instances, int numOfStock, List<Stock> stocks) throws InterruptedException {
-		List<String> logs = Collections.synchronizedList( new ArrayList<>());
+		List<String> logs = Collections.synchronizedList(new ArrayList<>());
 
 		scheduler.scheduleAtFixedRate(() -> {
 			int count = counter.incrementAndGet();
@@ -61,7 +61,6 @@ public class LogStock {
 				strBuilder.append("\n");
 			});
 			logs.add(String.format("%s\n%s", header, strBuilder.toString()));
-			//System.out.println(strBuilder.toString());
 
 			if (count >= instances)
 			    scheduler.shutdown();
