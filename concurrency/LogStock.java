@@ -15,7 +15,11 @@ public class LogStock {
 		//List<Stock> futureList = List.of(new Stock("S&P", 134, 8), new Stock("NASDAQ", 292, 1.5), new Stock("MNQ", 185, 2));
 		ExecutorService executor = Executors.newFixedThreadPool(3);
 		for (int i = 1; i <= 5; i++) {
-			executor.submit(() -> System.out.println(logStock(6, 3, stockList)));
+			executor.submit(() -> {
+				try {
+			            System.out.println(logStockUpdated(6, 3, stockList));
+				} catch(InterruptedException e) {}
+		});
 		}
 		executor.shutdown();
 		executor.awaitTermination(5, TimeUnit.SECONDS);
@@ -64,7 +68,7 @@ public class LogStock {
 
 			if (count >= instances)
 			    scheduler.shutdown();
-		}, 1, 1, TimeUnit.SECONDS);
+		}, 0, 1, TimeUnit.SECONDS);
 		scheduler.awaitTermination(7, TimeUnit.SECONDS);
 		return logs;
 	}
