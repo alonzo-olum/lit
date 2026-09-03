@@ -37,7 +37,7 @@ public class TwoSum {
 				pairs.add(new SimpleEntry<>(numbers[left], numbers[right]));
 				left++;
 				right--;
-			} else if ( total > target) {
+			} else if (total > target) {
 				right--;
 			} else {
 				left++;

@@ -15,8 +15,8 @@ public class LongestSubstringSum {
 			return array;
 
 		int left = 0, right = 1;
+		int maxLen = 0, maxStart = 0;
 		int currSum = array.get(left);
-		Map<Integer, List<Integer>> lenOfLists = new LinkedHashMap<>();
 
 		while (left <= right && right < array.size()) {
 			if (currSum < k) {
@@ -26,15 +26,15 @@ public class LongestSubstringSum {
 				currSum -= array.get(left);
 				left++;
 			} else {
-				lenOfLists.putIfAbsent(right - left, array.subList(left, right));
+				if ((right - left) > maxLen) {
+					maxLen   = right - left;
+					maxStart = left;
+				}
 				currSum += array.get(right);
 				right++;
 			}
 		}
-		return lenOfLists.entrySet().stream()
-			.max(Map.Entry.comparingByKey())
-			.map(Map.Entry::getValue)
-			.orElse(new ArrayList<>());
+		return array.subList(maxStart, maxStart + maxLen);
 	}
 
 	public static void main(String[] args) {

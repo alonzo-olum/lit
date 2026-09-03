@@ -6,7 +6,7 @@ class MinMaxScore {
 		int[] input3 = {23, 24, 25, 26, 27, 28};
 
 		int target = 30;
-		System.out.println(MinMaxScore.getIndex(input, target));
+		System.out.println(MinMaxScore.getIndex(input1, target));
 	}
 
 	public static int getIndex(int[] scores, int target) {
